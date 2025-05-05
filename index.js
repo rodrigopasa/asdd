@@ -1,4 +1,5 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
+import pkg from 'whatsapp-web.js';
+const { Client, LocalAuth } = pkg;
 import qrcode from 'qrcode-terminal';
 import express from 'express';
 import axios from 'axios';
@@ -41,4 +42,20 @@ client.on('ready', () => {
     console.log('WhatsApp Web pronto!');
 });
 
-// Enc
+// Encaminha mensagens recebidas para o webhook do n8n
+client.on('message', async msg => {
+    try {
+        await axios.post(WEBHOOK_N8N, {
+            from: msg.from,
+            body: msg.body
+        });
+    } catch (err) {
+        console.error('Erro ao enviar para n8n:', err.message);
+    }
+});
+
+client.initialize();
+
+app.listen(PORT, () => {
+    console.log(`API do bot ouvindo na porta ${PORT}`);
+});
