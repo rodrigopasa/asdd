@@ -1,0 +1,18 @@
+# Etapa de build
+FROM node:20-slim
+
+# Diretório de trabalho
+WORKDIR /app
+
+# Copia package.json e instala dependências
+COPY package*.json ./
+RUN npm install
+
+# Copia o restante do código
+COPY . .
+
+# Expõe a porta (caso necessário)
+EXPOSE 3001
+
+# Comando para iniciar
+CMD ["npm", "start"]
