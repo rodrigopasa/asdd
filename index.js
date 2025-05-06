@@ -4,7 +4,7 @@ import qrcode from 'qrcode-terminal';
 import express from 'express';
 import axios from 'axios';
 
-const WEBHOOK_N8N = process.env.WEBHOOK_N8N || 'https://ciliosaquarapunzel.store/webhook-test/whatsapp-in';
+const WEBHOOK_N8N = process.env.WEBHOOK_N8N || 'https://ciliosaquarapunzel.store/webhook/whatsapp-in';
 const PORT = process.env.PORT || 3001;
 
 const client = new Client({
