@@ -26,20 +26,20 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV CHROME_BIN=/usr/bin/chromium
 ENV NODE_ENV=production
 
-# Criar diretório de trabalho e usuário não-root
+# Criar diretório de trabalho
 WORKDIR /app
 
-# Copiar package.json e package-lock.json
+# Copiar package.json
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm ci --only=production
+# Usar npm install ao invés de npm ci (que requer package-lock.json)
+RUN npm install --omit=dev
 
 # Copiar o resto do código fonte
 COPY . .
 
 # Criar e configurar diretório para dados persistentes do WhatsApp
-RUN mkdir -p /app/.wwebjs_auth && chown -R node:node /app/.wwebjs_auth
+RUN mkdir -p /app/.wwebjs_auth && chmod -R 777 /app/.wwebjs_auth
 VOLUME /app/.wwebjs_auth
 
 # Expor porta
