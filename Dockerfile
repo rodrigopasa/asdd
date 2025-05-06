@@ -1,4 +1,4 @@
-FROM node:20-bullseye
+FROM node:18-bullseye
 
 # Instalar Chromium e dependências necessárias
 RUN apt-get update \
@@ -32,10 +32,10 @@ WORKDIR /app
 # Copiar package.json
 COPY package*.json ./
 
-# Usar npm install ao invés de npm ci (que requer package-lock.json)
+# Usar npm install em vez de npm ci
 RUN npm install --omit=dev
 
-# Copiar o resto do código fonte
+# Copiar o código fonte
 COPY . .
 
 # Criar e configurar diretório para dados persistentes do WhatsApp
@@ -45,5 +45,5 @@ VOLUME /app/.wwebjs_auth
 # Expor porta
 EXPOSE 3001
 
-# Comando para iniciar o bot
+# Iniciar o bot
 CMD ["node", "index.js"]
