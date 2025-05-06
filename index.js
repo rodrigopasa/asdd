@@ -11,7 +11,7 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     }
 });
 
@@ -24,12 +24,25 @@ app.post('/send', async (req, res) => {
     if (!to || !message) {
         return res.status(400).json({ error: 'to and message are required' });
     }
+    
     try {
-        await client.sendMessage(to, message);
-        res.json({ status: 'sent' });
+        // Converter para string caso receba objeto ou número
+        const messageText = typeof message === 'object' ? JSON.stringify(message) : String(message);
+        await client.sendMessage(to, messageText);
+        res.json({ status: 'sent', to });
     } catch (err) {
+        console.error('Erro ao enviar mensagem:', err);
         res.status(500).json({ error: err.toString() });
     }
+});
+
+// Endpoint de healthcheck
+app.get('/status', (req, res) => {
+    const isConnected = client.info ? true : false;
+    res.json({ 
+        status: isConnected ? 'connected' : 'disconnected',
+        info: isConnected ? client.info.wid.user : null
+    });
 });
 
 // Exibe QR code no console para autenticação
@@ -47,7 +60,12 @@ client.on('message', async msg => {
     try {
         await axios.post(WEBHOOK_N8N, {
             from: msg.from,
-            body: msg.body
+            body: msg.body,
+            message: msg.body,
+            timestamp: msg.timestamp,
+            hasMedia: msg.hasMedia,
+            type: msg.type,
+            isGroup: msg.isGroup
         });
     } catch (err) {
         console.error('Erro ao enviar para n8n:', err.message);
