@@ -6,6 +6,7 @@ import axios from 'axios';
 import https from 'https';
 import fs from 'fs';
 import { URL } from 'url';
+import { v4 as uuidv4 } from 'uuid'; // Importa a função para gerar UUIDs
 
 // Configurações principais
 const WEBHOOK_N8N = process.env.WEBHOOK_N8N || 'https://ciliosaquarapunzel.store/webhook/whatsapp-in';
@@ -112,7 +113,8 @@ app.get('/test-webhook', async (req, res) => {
         const response = await axios.post(WEBHOOK_N8N, {
             from: "test@bot",
             body: "Teste de conexão com n8n",
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            id: uuidv4() // Adiciona um UUID ao corpo da mensagem
         }, {
             httpsAgent: new https.Agent({ rejectUnauthorized: false })
         });
@@ -136,7 +138,8 @@ app.get('/test-webhook-url', async (req, res) => {
         const response = await axios.post(WEBHOOK_N8N_TEST, {
             from: "test@bot",
             body: "Teste de conexão com n8n usando URL de teste",
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            id: uuidv4() // Adiciona um UUID ao corpo da mensagem
         }, {
             httpsAgent: new https.Agent({ rejectUnauthorized: false })
         });
@@ -189,12 +192,16 @@ client.on('message', async msg => {
     try {
         console.log(`Mensagem de ${msg.from}: ${msg.body}`);
 
+        // Gera um UUID para a mensagem
+        const messageId = uuidv4();
+
         // Se a mensagem for o comando de teste, enviar para a URL de teste
         if (msg.body.toLowerCase() === 'teste') {
             const response = await axios.post(WEBHOOK_N8N_TEST, {
                 from: msg.from,
                 body: msg.body,
-                timestamp: msg.timestamp
+                timestamp: msg.timestamp,
+                id: messageId // Adiciona o UUID ao corpo da mensagem
             }, {
                 httpsAgent: new https.Agent({ rejectUnauthorized: false })
             });
@@ -217,7 +224,8 @@ client.on('message', async msg => {
                 timestamp: msg.timestamp,
                 hasMedia: msg.hasMedia,
                 type: msg.type,
-                isGroup: msg.isGroup
+                isGroup: msg.isGroup,
+                id: messageId // Adiciona o UUID ao corpo da mensagem
             }, {
                 httpsAgent: new https.Agent({ rejectUnauthorized: false })
             });
