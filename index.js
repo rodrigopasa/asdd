@@ -189,28 +189,41 @@ client.on('message', async msg => {
     try {
         console.log(`Mensagem de ${msg.from}: ${msg.body}`);
 
-        // Montar URL com query params
-        const webhookUrl = new URL(WEBHOOK_N8N);
-        webhookUrl.searchParams.append('from', msg.from);
-        webhookUrl.searchParams.append('message', msg.body);
-        webhookUrl.searchParams.append('timestamp', msg.timestamp);
-        webhookUrl.searchParams.append('hasMedia', msg.hasMedia);
-        webhookUrl.searchParams.append('type', msg.type);
-        webhookUrl.searchParams.append('isGroup', msg.isGroup);
+        // Se a mensagem for o comando de teste, enviar para a URL de teste
+        if (msg.body.toLowerCase() === 'teste') {
+            const response = await axios.post(WEBHOOK_N8N_TEST, {
+                from: msg.from,
+                body: msg.body,
+                timestamp: msg.timestamp
+            }, {
+                httpsAgent: new https.Agent({ rejectUnauthorized: false })
+            });
 
-        const response = await axios.post(webhookUrl.toString(), {
-            from: msg.from,
-            body: msg.body,
-            message: msg.body,
-            timestamp: msg.timestamp,
-            hasMedia: msg.hasMedia,
-            type: msg.type,
-            isGroup: msg.isGroup
-        }, {
-            httpsAgent: new https.Agent({ rejectUnauthorized: false })
-        });
+            console.log(`Mensagem de teste enviada ao N8N: ${response.status}`);
+        } else {
+            // Montar URL com query params
+            const webhookUrl = new URL(WEBHOOK_N8N);
+            webhookUrl.searchParams.append('from', msg.from);
+            webhookUrl.searchParams.append('message', msg.body);
+            webhookUrl.searchParams.append('timestamp', msg.timestamp);
+            webhookUrl.searchParams.append('hasMedia', msg.hasMedia);
+            webhookUrl.searchParams.append('type', msg.type);
+            webhookUrl.searchParams.append('isGroup', msg.isGroup);
 
-        console.log(`Mensagem enviada ao N8N: ${response.status}`);
+            const response = await axios.post(webhookUrl.toString(), {
+                from: msg.from,
+                body: msg.body,
+                message: msg.body,
+                timestamp: msg.timestamp,
+                hasMedia: msg.hasMedia,
+                type: msg.type,
+                isGroup: msg.isGroup
+            }, {
+                httpsAgent: new https.Agent({ rejectUnauthorized: false })
+            });
+
+            console.log(`Mensagem enviada ao N8N: ${response.status}`);
+        }
     } catch (err) {
         console.error(`Erro no envio ao webhook: ${err.message}`);
         if (err.response) {
